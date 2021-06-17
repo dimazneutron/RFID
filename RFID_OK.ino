@@ -1,3 +1,5 @@
+//Dimas project-Publish on GitHub
+
 #include <SPI.h>
 #include <SD.h>
 //#include <Wire.h> //library untuk wire i2c
@@ -12,7 +14,7 @@ DS3231  rtc(SDA, SCL);
 
 
 
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };  
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
 // the dns server ip
 //IPAddress dnServer(192, 168, 1, 1);
@@ -29,7 +31,7 @@ EthernetServer server(80);
 
 
 #define sda 3 //Pin Serialdata (SDA)
-#define rst 8 //pin Reset 
+#define rst 8 //pin Reset
 
 #define buzzer 6 //buzzer
 #define mode 19 //switch mode, active low
@@ -58,7 +60,7 @@ void setup() {
   digitalWrite(buzzer, LOW);
   pinMode(mode, INPUT); //active low
   digitalWrite(mode, HIGH);
-  
+
   rtc.begin();
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
@@ -88,7 +90,7 @@ void setup() {
     Serial.println("error opening test.txt");
   }
   Serial.println();
-  
+
 //------------------------------------------------------Gateway.txt
   myFile = SD.open("gateway.txt"); //membuka file di sd card
   if (myFile) {
@@ -118,7 +120,7 @@ void setup() {
     Serial.println("error opening test.txt");
   }
   Serial.println();
-  
+
 //------------------------------------------------------SERVER.txt
   myFile = SD.open("server.txt"); //membuka file di sd card
   if (myFile) {
@@ -134,7 +136,7 @@ void setup() {
     Serial.println("error opening test.txt");
   }
   Serial.println();
-  
+
  //---------------------------------------------------------------------------Save to IP----
   int Parts2[4] = {0,0,0,0};
   int Part2 = 0;
@@ -148,7 +150,7 @@ void setup() {
     Parts2[Part2] += c - '0';
   }
   IPAddress ip( Parts2[0], Parts2[1], Parts2[2], Parts2[3] );
-  
+
  //---------------------------------------------------------------------------Save to GATEWAY----
   int Parts3[4] = {0,0,0,0};
   int Part3 = 0;
@@ -162,7 +164,7 @@ void setup() {
     Parts3[Part3] += c - '0';
   }
   IPAddress gateway( Parts3[0], Parts3[1], Parts3[2], Parts3[3] );
-  
+
  //---------------------------------------------------------------------------Save to SUBNET----
   int Parts4[4] = {0,0,0,0};
   int Part4 = 0;
@@ -196,7 +198,7 @@ void setup() {
 void syncTime(){
   bool use = false;
   String reply = "";
-  
+
   if (client.connect(server_txt.c_str(), port)) {
     Serial.println("connected");
     client.println("GET /attendance/get_time HTTP/1.1");
@@ -205,7 +207,7 @@ void syncTime(){
     client.println("Connection: close");
     client.println();
     delay(100);
-        
+
     String reply_server;
     if (client.available()) {
       String xx = String(client.readString());
@@ -213,7 +215,7 @@ void syncTime(){
         if (xx[i] == '{') {
           use = true;
           continue;
-        }  
+        }
         if (xx[i] == '}') {
           continue;
         }
@@ -241,10 +243,10 @@ void syncTime(){
     jam=dateTimes[3];
     mnt=dateTimes[4];
     dtk=dateTimes[5];
-    
+
     rtc.setTime(jam, mnt, dtk);
     rtc.setDate(tgl, bln, thn);
-    
+
     Serial.print("Date = ");
     Serial.print(tgl);
     Serial.print(bln);
@@ -274,22 +276,22 @@ void tapCard(){
       id_card += rfid.serNum[3];
       id_card += rfid.serNum[4];
 
-      // IF CLIENT OK 
+      // IF CLIENT OK
       Serial.println(server_txt);
       Serial.println("Tap Card");
-      
+
       if (client.connect(server_txt.c_str(), port)) {
-        
+
         Serial.println("connected");
         // request to server
-        
+
         String timeTap=rtc.getTimeStr();
         String dateTap=rtc.getDateStr();
         client.println("GET /attendance_school/make?rfid=" + id_card + "&timestamp=" + dateTap + "T" + timeTap + " HTTP/1.1");
         Serial.println(id_card);
         Serial.println(timeTap);
         Serial.println(dateTap);
-        
+
         //client.println("Connection: keep-alive");
         client.println("Host: " + server_txt + ":" + String(port));
         client.println("Connection: close");
@@ -304,13 +306,13 @@ void tapCard(){
           for ( int i=0; i < xx.length(); i++ ){
             if (xx[i] == '{') {
               use = true;
-            }  
+            }
             if (use) {
               reply += xx[i];
             }
           }
         }
-        
+
         Serial.println(reply);
         Serial.println();
         //client.stop();
@@ -328,11 +330,11 @@ void tapCard(){
         Serial.println("Save to Card.........");
         speaker(2);
       }
-       
+
       // END READ
-      delay(100);   
+      delay(100);
     }
-  } 
+  }
 }
 
 void tapRegistered(){
@@ -347,22 +349,22 @@ void tapRegistered(){
       id_card += rfid.serNum[3];
       id_card += rfid.serNum[4];
 
-      // IF CLIENT OK 
+      // IF CLIENT OK
       Serial.println(server_txt);
       Serial.println("Tap Registered");
-      
+
       if (client.connect(server_txt.c_str(), port)) {
-        
+
         Serial.println("connected");
         // request to server
-        
+
         String timeTap=rtc.getTimeStr();
         String dateTap=rtc.getDateStr();
         client.println("GET /attendance_school/register_card?rfid=" + id_card  + " HTTP/1.1");
         Serial.println(id_card);
         Serial.println(timeTap);
         Serial.println(dateTap);
-        
+
         //client.println("Connection: keep-alive");
         client.println("Host: " + server_txt + ":" + String(port));
         client.println("Connection: close");
@@ -372,11 +374,11 @@ void tapRegistered(){
       }
       else{
       }
-       
+
       // END READ
-      delay(100);   
+      delay(100);
     }
-  } 
+  }
 }
 
 void speaker(int n){
@@ -399,7 +401,7 @@ void speaker(int n){
     noTone(buzzer);
   }
   if(n==3){
-    
+
   }
 }
 
@@ -408,7 +410,7 @@ void loop() {
 
   saveTime=rtc.getTime(); //untuk memyimpan waktu
   jamNow = saveTime.min;
-  
+
   if((jamTemp + 1) == jamNow){
     Serial.print("Sync Time ");
     syncTime();
